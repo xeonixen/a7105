@@ -1,29 +1,6 @@
 #ifndef _IFACE_A7105_H_
 #define _IFACE_A7105_H_
 
-// constants for arduino pins
-#define RED_LED 52
-#define BLUE_LED 53
-#define CS_PIN 10 
-#define RED_ON() digitalWrite(RED_LED, HIGH);
-#define RED_OFF() digitalWrite(RED_LED, LOW);
-#define BLUE_ON() digitalWrite(BLUE_LED, HIGH);
-#define BLUE_OFF() digitalWrite(BLUE_LED, LOW);
-#define CS_HI() digitalWrite(CS_PIN, HIGH);
-#define CS_LO() digitalWrite(CS_PIN, LOW);
-
-bool verbose;
-u8 packet[16];
-u8 testpacket[16];
-u8 receivedpacket[16];
-u8 channel;
-unsigned long sessionid;
-const unsigned long txid = 0xdb042679; // transmitter ID
-u8 state;
-int startTime, waitTime, hubsanWait, finishTime;
-  
-
-// strobe commands. These are used to set the transceiver mode
 enum A7105_State {
     A7105_SLEEP     = 0x80,
     A7105_IDLE      = 0x90,
@@ -35,7 +12,6 @@ enum A7105_State {
     A7105_RST_RDPTR = 0xF0,
 };
 
-// register addresses
 enum {
     A7105_00_MODE         = 0x00,
     A7105_01_MODE_CONTROL = 0x01,
@@ -88,7 +64,7 @@ enum {
     A7105_30_IFAT         = 0x30,
     A7105_31_RSCALE       = 0x31,
     A7105_32_FILTER_TEST  = 0x32,
-m};
+};
 #define A7105_0F_CHANNEL A7105_0F_PLL_I
 
 enum A7105_MASK {
@@ -96,48 +72,15 @@ enum A7105_MASK {
     A7105_MASK_VBCF = 1 << 3,
 };
 
-
-// Set CS pin mode, initialse and set sensible defaults for SPI, set GIO1 as output on chip
-void A7105_Setup();
-
-// Triggers the chip to reset, then prints the contents of the mode register to serial
-void A7105_Reset();
-
-// sets the transmitter power on the chip
-void A7105_SetPower(int power);
-
-// Transmits the given strobe command. Commands are enumerated in a7105.h and detailed in the documentation
-void A7105_Strobe(enum A7105_State);
-
-// Access the current value of the transmitter ID
-void A7105_WriteID(u32 id);
-void A7105_ReadID();
-
-// Access an arbitrary register, given by addr
+void A7105_Initialize();
 void A7105_WriteReg(u8 addr, u8 value);
-u8 A7105_ReadReg(u8 addr);
-
-// Transmit or receive data through the FIFO buffer with current settings
 void A7105_WriteData(u8 *dpbuffer, u8 len, u8 channel);
 void A7105_ReadData(u8 *dpbuffer, u8 len);
+u8 A7105_ReadReg(u8 addr);
+void A7105_Reset();
+void A7105_WriteID(u32 id);
+void A7105_Strobe(enum A7105_State);
+void A7105_SetPower(int power);
 
-// Build a distinctive test packet
-void make_test_packet(u8 testpacket[]);
-
-// Print the provided packet in human-readable format
-void printpacket(u8 packet[]);
-
-// Eavesdrop on a hubsan exchange. This must be started prior to the binding exchange
-void eavesdrop(u32 sess_id, u8 sess_channel);
-
-// Shout a test packet on the current channel
-void A7105_shoutchannel();
-
-// Scan list of wireless channels for traffic
-void A7105_scanchannels(const u8 channels[]);
-
-// sniff either the current channel or a given channel
-void A7105_sniffchannel(u8 _channel);
-int A7105_sniffchannel();
 
 #endif
